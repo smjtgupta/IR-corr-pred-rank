@@ -1,0 +1,56 @@
+close all;
+clear;
+clc;
+
+%%
+% Sample Covariance matrix taken from the paper:
+% Selecting band combinations from multispectral data, Sheffield
+% They have computed the most relevant features from this matrix
+% Optimal Ordering in decreasing Order is: 5, 4, 1, 7, 6, 3, 2
+
+C = [53.32, 27.41, 35.74, 5.86, 36.04, 33.56, 7.77;
+     27.41, 17.01, 21.35, 11.36, 29.35, 21.29, 4.13;
+     35.74, 21.35, 31.66, 20.01, 46.46, 31.03, 6.69;
+     5.86, 11.36, 20.01, 131.71, 131.64, 38.14, 8.26;
+     36.04, 29.35, 46.56, 131.64, 210.83, 86.25, 19.10;
+     33.56, 21.29, 31.03, 38.14, 86.25, 50.01, 11.51;
+     7.77, 4.13, 6.69, 8.26, 19.10, 11.51, 9.80];
+
+figure;
+imagesc(C);
+title 'Covariance between Entries'
+colorbar;
+
+%% greedy_forward
+ 
+k = 1; % counter
+max_k = size(C,1); % number of elements
+n = size(C,1); % count size
+SsX = C; % temp variable for sub-determinant
+val_det_for = zeros(1,max_k); % list of sub-determinant values after each exclusion
+identity_det_for = zeros(1,max_k); % list of sub-determinant index chosen
+list = 1:max_k;
+
+while k<=n
+    [maxval,argmax] = max(sum(SsX,2)); % compute approx sub-determinant values
+    val_det_for(1,max_k-k+1) = maxval;
+    SsX(argmax,:) = [];
+    SsX(:,argmax) = [];
+    identity_det_back(1,k) = list(argmax)
+    list(argmax) = [];
+    k = k+1;
+end
+
+save('det_for.mat','val_det_for');
+%%
+
+% figure;
+% bar(log10(val_det));
+% axis tight;
+% grid on;
+% xlabel 'Metrics'
+% ylabel 'Value of sub-determinant log_{10} scale'
+% names = {'MAP@1000','P@1000','NDCG@1000','RBP-0.95','ERR','R-Prec','R@1000','bpref','MAP@100','P@100','NDCG@100','RBP-0.8','R@100','MAP@20','RBP-0.5','P@20','NDCG@20','R@20','MAP@10','P@10','NDCG@10','R@10','RR'
+% };
+% names_fl = fliplr(names);
+% set(gca,'xtick',[1:23],'xticklabel',names_fl)
